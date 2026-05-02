@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-  StatusBar,
+  View, Text, StyleSheet, ScrollView,
+  TouchableOpacity, RefreshControl, StatusBar, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../constants/colors';
@@ -20,7 +15,7 @@ import useAuthStore from '../../store/authStore';
 
 const RecurringScreen = ({ navigation }) => {
   const { user } = useAuthStore();
-  const { recurringItems, fetchRecurring, isLoading } = useRecurringStore();
+  const { recurringItems, fetchRecurring, deleteRecurring, isLoading } = useRecurringStore();
   const [refreshing, setRefreshing] = useState(false);
   const currency = user?.currency || 'LKR';
 
@@ -32,13 +27,25 @@ const RecurringScreen = ({ navigation }) => {
     setRefreshing(false);
   }, []);
 
+  const handleDelete = (item) => {
+    Alert.alert('Delete Recurring', `Delete "${item.title}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive',
+        onPress: async () => { await deleteRecurring(item._id); },
+      },
+    ]);
+  };
+
   return (
     <ScreenWrapper backgroundColor={colors.background}>
       <StatusBar barStyle="dark-content" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primaryDark} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primaryDark} />
+        }
       >
         {/* Header */}
         <View style={styles.header}>
@@ -46,7 +53,7 @@ const RecurringScreen = ({ navigation }) => {
             <Ionicons name="chevron-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Recurring</Text>
-          <View style={{ width: 40 }} />
+          <View style={{ width: 44 }} />
         </View>
 
         <View style={styles.list}>
@@ -56,7 +63,12 @@ const RecurringScreen = ({ navigation }) => {
                 key={item._id}
                 item={item}
                 currency={currency}
-                onPress={() => navigation.navigate('AddRecurring', { recurring: item })}
+                // Tap card → view-only detail screen
+                onPress={() => navigation.navigate('RecurringDetail', { recurring: item })}
+                // Edit icon → go directly to edit page
+                onEdit={() => navigation.navigate('AddRecurring', { recurring: item })}
+                // Delete icon → confirm then delete
+                onDelete={() => handleDelete(item)}
               />
             ))
           ) : (
