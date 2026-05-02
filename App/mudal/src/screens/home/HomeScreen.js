@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import colors from '../../constants/colors';
@@ -13,27 +14,46 @@ import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import BalanceCard from '../../components/BalanceCard';
 import TransactionItem from '../../components/TransactionItem';
+import RecurringItem from '../../components/RecurringItem';
 import SectionHeader from '../../components/SectionHeader';
 import useAuthStore from '../../store/authStore';
 import useTransactionStore from '../../store/transactionStore';
+import useRecurringStore from '../../store/recurringStore';
 
 const HomeScreen = ({ navigation }) => {
   const { user } = useAuthStore();
-  const { transactions, fetchTransactions } = useTransactionStore();
+  const { transactions, fetchTransactions, isLoading: txLoading } = useTransactionStore();
+  const { recurringItems, fetchRecurring, isLoading: recLoading } = useRecurringStore();
+
   const currency = user?.currency || 'LKR';
+  const firstName = user?.name?.split(' ')[0] || 'User';
 
-  useEffect(() => { fetchTransactions(); }, []);
+  const loadData = useCallback(async () => {
+    await Promise.all([
+      fetchTransactions(),
+      fetchRecurring(),
+    ]);
+  }, [fetchTransactions, fetchRecurring]);
 
-  const income = transactions
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Calculate totals from recurring transactions (Home Screen only)
+  const income = recurringItems
     .filter((t) => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
-  const expense = transactions
+  const expense = recurringItems
     .filter((t) => t.type === 'expense')
     .reduce((sum, t) => sum + t.amount, 0);
   const balance = income - expense;
+
   const recent = transactions.slice(0, 5);
 
-  const firstName = user?.name?.split(' ')[0] || 'User';
+  // Show top 2 upcoming recurring items
+  const upcomingRec = [...recurringItems]
+    .sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate))
+    .slice(0, 2);
 
   return (
     <ScreenWrapper backgroundColor={colors.background}>
@@ -41,6 +61,13 @@ const HomeScreen = ({ navigation }) => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={txLoading || recLoading}
+            onRefresh={loadData}
+            tintColor={colors.primaryDark}
+          />
+        }
       >
         {/* ── Header ── */}
         <View style={styles.header}>
@@ -65,7 +92,6 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={styles.actionBtn}
-            activeOpacity={0.8}
             onPress={() => navigation.navigate('TransactionsTab', { screen: 'AddTransaction', params: { type: 'expense' } })}
           >
             <View style={styles.actionIconCircle}>
@@ -76,7 +102,6 @@ const HomeScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.actionBtn}
-            activeOpacity={0.8}
             onPress={() => navigation.navigate('TransactionsTab', { screen: 'AddTransaction', params: { type: 'income' } })}
           >
             <View style={styles.actionIconCircle}>
@@ -87,8 +112,7 @@ const HomeScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.actionBtn}
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('BudgetsTab')}
+            onPress={() => navigation.navigate('BudgetsTab', { screen: 'Recurring' })}
           >
             <View style={styles.actionIconCircle}>
               <Ionicons name="wallet-outline" size={18} color={colors.text} />
@@ -97,7 +121,7 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* ── Quick Stats ── */}
+        {/* ── Quick Stats (Restored) ── */}
         <View style={styles.quickStats}>
           <View style={styles.quickStatCard}>
             <View style={[styles.quickStatIcon, { backgroundColor: colors.successLight }]}>
@@ -122,7 +146,29 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* ── Transaction Section ── */}
+        {/* ── Recurring Section (Added) ── */}
+        {upcomingRec.length > 0 && (
+          <View style={styles.transactionSection}>
+            <SectionHeader
+              title="Recurring Transactions"
+              actionText="See all"
+              onAction={() => navigation.navigate('BudgetsTab', { screen: 'Recurring' })}
+            />
+            {upcomingRec.map((item) => (
+              <RecurringItem
+                key={item._id}
+                item={item}
+                currency={currency}
+                onPress={() => navigation.navigate('BudgetsTab', {
+                  screen: 'RecurringDetail',
+                  params: { recurring: item }
+                })}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* ── Transaction Section (Restored style with Mock Data) ── */}
         <View style={styles.transactionSection}>
           <SectionHeader
             title="Transaction"
@@ -209,9 +255,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderLight,
   },
-  actionBtnAdd: {
-    flex: 0.6,
-  },
   actionIconCircle: {
     width: 40,
     height: 40,
@@ -220,10 +263,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-  },
-  addIconCircle: {
-    backgroundColor: colors.primaryDark,
-    marginBottom: 0,
   },
   actionLabel: {
     ...typography.caption,
@@ -262,6 +301,7 @@ const styles = StyleSheet.create({
   },
   transactionSection: {
     paddingHorizontal: 20,
+    marginBottom: 20,
   },
   dateLabel: {
     ...typography.caption,
