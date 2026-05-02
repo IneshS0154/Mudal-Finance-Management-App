@@ -8,22 +8,65 @@ import InputField from '../../components/InputField';
 import CategoryIcon from '../../components/CategoryIcon';
 import PillButton from '../../components/PillButton';
 import useCategoryStore from '../../store/categoryStore';
+import useRecurringStore from '../../store/recurringStore';
+import AmountInput from '../../components/AmountInput';
 import { categoryIcons } from '../../constants/icons';
 
 const COLORS_PALETTE = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A66CFF', '#49B6FF', '#54A0FF', '#5F27CD', '#10AC84', '#01A3A4', '#6C5CE7', '#34C759', '#00B894', '#FDCB6E', '#81ECEC', '#E17055', '#636E72'];
 const ICON_KEYS = Object.keys(categoryIcons);
 
 const AddCategoryScreen = ({ navigation }) => {
-  const { addCategory, isLoading } = useCategoryStore();
+  const { addCategory, isLoading: catLoading } = useCategoryStore();
+  const { addRecurring, isLoading: recLoading } = useRecurringStore();
   const [name, setName] = useState('');
   const [type, setType] = useState('expense');
   const [selectedColor, setSelectedColor] = useState(COLORS_PALETTE[0]);
   const [selectedIcon, setSelectedIcon] = useState(ICON_KEYS[0]);
 
+  // Recurring fields
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [amount, setAmount] = useState('');
+  const [frequency, setFrequency] = useState('monthly');
+
+  const isLoading = catLoading || recLoading;
+
   const handleSave = async () => {
     if (!name.trim()) { Alert.alert('Missing Name', 'Enter a category name'); return; }
-    const result = await addCategory({ name: name.trim(), type, color: selectedColor, icon: selectedIcon });
-    if (result.success) navigation.goBack(); else Alert.alert('Error', result.error);
+    
+    if (isRecurring) {
+      if (!amount || parseFloat(amount) <= 0) {
+        Alert.alert('Invalid Amount', 'Enter a valid amount for recurring payment');
+        return;
+      }
+    }
+
+    const catResult = await addCategory({ 
+      name: name.trim(), 
+      type, 
+      color: selectedColor, 
+      icon: selectedIcon 
+    });
+
+    if (catResult.success) {
+      if (isRecurring) {
+        // Also create a recurring payment
+        const recResult = await addRecurring({
+          title: name.trim(),
+          amount: parseFloat(amount),
+          type,
+          frequency,
+          category: { name: name.trim(), icon: selectedIcon, color: selectedColor, _id: catResult.data?._id },
+          startDate: new Date().toISOString(),
+        });
+        
+        if (!recResult.success) {
+          Alert.alert('Category Created', `Category added but recurring payment failed: ${recResult.error}`);
+        }
+      }
+      navigation.goBack(); 
+    } else {
+      Alert.alert('Error', catResult.error);
+    }
   };
 
   return (
@@ -54,6 +97,42 @@ const AddCategoryScreen = ({ navigation }) => {
               <Text style={[styles.typeBtnText, type === 'income' && styles.typeBtnTextActive]}>Income</Text>
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* ── Recurring Toggle ─────────────────────────────── */}
+        <View style={styles.formCard}>
+          <View style={styles.toggleRow}>
+            <View>
+              <Text style={styles.fieldLabel}>Recurring Payment</Text>
+              <Text style={styles.fieldSubtitle}>Automatically add transactions</Text>
+            </View>
+            <TouchableOpacity 
+              onPress={() => setIsRecurring(!isRecurring)}
+              style={[styles.toggleSwitch, isRecurring && styles.toggleSwitchActive]}
+            >
+              <View style={[styles.toggleThumb, isRecurring && styles.toggleThumbActive]} />
+            </TouchableOpacity>
+          </View>
+
+          {isRecurring && (
+            <View style={{ marginTop: 20 }}>
+              <Text style={styles.fieldLabel}>Amount</Text>
+              <AmountInput value={amount} onChangeText={setAmount} />
+              
+              <Text style={[styles.fieldLabel, { marginTop: 16 }]}>Frequency</Text>
+              <View style={styles.freqRow}>
+                {['daily', 'weekly', 'monthly', 'yearly'].map((f) => (
+                  <TouchableOpacity
+                    key={f}
+                    style={[styles.freqChip, frequency === f && styles.freqChipActive]}
+                    onPress={() => setFrequency(f)}
+                  >
+                    <Text style={[styles.freqText, frequency === f && styles.freqTextActive]}>{f}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -106,6 +185,21 @@ const styles = StyleSheet.create({
   iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   iconItem: { padding: 6, borderRadius: 12 },
   iconItemActive: { backgroundColor: colors.primaryMuted },
+  
+  // Toggle
+  toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  fieldSubtitle: { ...typography.caption, color: colors.textSecondary, marginTop: -4 },
+  toggleSwitch: { width: 48, height: 26, borderRadius: 13, backgroundColor: colors.border, padding: 3 },
+  toggleSwitchActive: { backgroundColor: colors.success },
+  toggleThumb: { width: 20, height: 20, borderRadius: 10, backgroundColor: colors.white },
+  toggleThumbActive: { transform: [{ translateX: 22 }] },
+  
+  // Frequency
+  freqRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  freqChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: colors.backgroundDark, borderWidth: 1, borderColor: colors.borderLight },
+  freqChipActive: { backgroundColor: colors.primaryDark, borderColor: colors.primaryDark },
+  freqText: { ...typography.caption, color: colors.textSecondary, textTransform: 'capitalize' },
+  freqTextActive: { color: colors.textOnDark, fontWeight: '600' },
 });
 
 export default AddCategoryScreen;

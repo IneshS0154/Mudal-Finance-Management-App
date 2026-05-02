@@ -156,32 +156,38 @@ const styles = StyleSheet.create({
   },
   shadowContainer: {
     // Deep liquid shadow
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.15,
-    shadowRadius: 24,
-    elevation: 20,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 16 },
+        shadowOpacity: 0.2,
+        shadowRadius: 32,
+      },
+      android: {
+        elevation: 20,
+      }
+    })
   },
   glassContainer: {
     borderRadius: 36, // Maximum pill shape for a fluid drop look
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Very transparent base
+    backgroundColor: Platform.OS === 'ios' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.95)',
     // Outer border for tension surface
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   liquidRefraction: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     // 3D specular highlight and bottom shadow for viscosity
-    borderTopWidth: 2.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.95)',
-    borderLeftWidth: 1,
-    borderLeftColor: 'rgba(255, 255, 255, 0.6)',
-    borderBottomWidth: 1.5,
-    borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopWidth: 2,
+    borderTopColor: 'rgba(255, 255, 255, 1)',
+    borderLeftWidth: 1.5,
+    borderLeftColor: 'rgba(255, 255, 255, 0.8)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
     borderRightWidth: 1,
-    borderRightColor: 'rgba(255, 255, 255, 0.05)',
+    borderRightColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 36,
   },
   tabRow: {

@@ -14,10 +14,17 @@ const EditProfileScreen = ({ navigation }) => {
   const { user, updateProfile, isLoading } = useAuthStore();
   const [name, setName] = useState(user?.name || '');
   const [currency, setCurrency] = useState(user?.currency || 'LKR');
+  const [occupation, setOccupation] = useState(user?.occupation || '');
+  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
 
   const handleSave = async () => {
     if (!name.trim()) { Alert.alert('Invalid', 'Name cannot be empty'); return; }
-    const result = await updateProfile({ name: name.trim(), currency });
+    const result = await updateProfile({
+      name: name.trim(),
+      currency,
+      occupation: occupation.trim(),
+      phoneNumber: phoneNumber.trim(),
+    });
     if (result.success) navigation.goBack(); else Alert.alert('Error', result.error);
   };
 
@@ -32,6 +39,8 @@ const EditProfileScreen = ({ navigation }) => {
         </View>
         <View style={styles.formCard}>
           <InputField label="Full Name" value={name} onChangeText={setName} autoCapitalize="words" />
+          <InputField label="Occupation" value={occupation} onChangeText={setOccupation} placeholder="e.g. Software Engineer" />
+          <InputField label="Phone Number" value={phoneNumber} onChangeText={setPhoneNumber} keyboardType="phone-pad" placeholder="+94..." />
           <Text style={styles.fieldLabel}>Preferred Currency</Text>
           <View style={styles.currencyRow}>
             {CURRENCIES.map((cur) => (
@@ -42,6 +51,7 @@ const EditProfileScreen = ({ navigation }) => {
           </View>
           <PillButton title="Save Changes" onPress={handleSave} loading={isLoading} style={{ marginTop: 8 }} />
         </View>
+        <View style={{ height: 120 }} />
       </ScrollView>
     </ScreenWrapper>
   );

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import client from '../api/client';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 // Helper to build dates relative to today
 const daysAgo = (n) => {

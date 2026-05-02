@@ -25,85 +25,50 @@ const useCategoryStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
+  // Initialize from user data
+  setCategories: (categories) => set({ categories }),
+
   fetchCategories: async () => {
+    // Categories are now part of the user object in authStore
+    // We can pull them from the backend profile
     set({ isLoading: true, error: null });
-    if (USE_MOCK) {
-      await new Promise((r) => setTimeout(r, 200));
-      set({ categories: MOCK_CATEGORIES, isLoading: false });
-      return;
-    }
     try {
-      const { data } = await client.get('/categories');
-      set({ categories: data, isLoading: false });
+      const { data } = await client.get('/users/profile');
+      const userCats = data.data.categories || [];
+      // If no categories, use some defaults? 
+      // For now just set what's there
+      set({ categories: userCats, isLoading: false });
     } catch (err) {
-      set({ error: err.response?.data?.message || 'Failed to fetch categories', isLoading: false });
+      set({ error: 'Failed to fetch categories', isLoading: false });
     }
   },
 
   addCategory: async (category) => {
     set({ isLoading: true, error: null });
-    if (USE_MOCK) {
-      await new Promise((r) => setTimeout(r, 300));
-      const newCat = { ...category, _id: `cat_${Date.now()}` };
-      set((state) => ({ categories: [...state.categories, newCat], isLoading: false }));
-      return { success: true, data: newCat };
-    }
     try {
-      const { data } = await client.post('/categories', category);
-      set((state) => ({ categories: [...state.categories, data], isLoading: false }));
-      return { success: true, data };
+      const currentCats = get().categories;
+      const updatedCats = [...currentCats, category];
+      
+      const { data } = await client.put('/users/profile', { categories: updatedCats });
+      const newCats = data.data.categories;
+      set({ categories: newCats, isLoading: false });
+      return { success: true, data: newCats[newCats.length - 1] };
     } catch (err) {
-      const message = err.response?.data?.message || 'Failed to add category';
-      set({ error: message, isLoading: false });
-      return { success: false, error: message };
-    }
-  },
-
-  updateCategory: async (id, updates) => {
-    set({ isLoading: true, error: null });
-    if (USE_MOCK) {
-      await new Promise((r) => setTimeout(r, 300));
-      set((state) => ({
-        categories: state.categories.map((c) => (c._id === id ? { ...c, ...updates } : c)),
-        isLoading: false,
-      }));
-      return { success: true };
-    }
-    try {
-      const { data } = await client.put(`/categories/${id}`, updates);
-      set((state) => ({
-        categories: state.categories.map((c) => (c._id === id ? data : c)),
-        isLoading: false,
-      }));
-      return { success: true, data };
-    } catch (err) {
-      const message = err.response?.data?.message || 'Failed to update category';
-      set({ error: message, isLoading: false });
-      return { success: false, error: message };
+      set({ error: 'Failed to add category', isLoading: false });
+      return { success: false };
     }
   },
 
   deleteCategory: async (id) => {
     set({ isLoading: true, error: null });
-    if (USE_MOCK) {
-      await new Promise((r) => setTimeout(r, 300));
-      set((state) => ({
-        categories: state.categories.filter((c) => c._id !== id),
-        isLoading: false,
-      }));
-      return { success: true };
-    }
     try {
-      await client.delete(`/categories/${id}`);
-      set((state) => ({
-        categories: state.categories.filter((c) => c._id !== id),
-        isLoading: false,
-      }));
+      const updatedCats = get().categories.filter(c => c._id !== id);
+      await client.put('/users/profile', { categories: updatedCats });
+      set({ categories: updatedCats, isLoading: false });
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.message || 'Failed to delete category';
-      set({ error: message, isLoading: false });
-      return { success: false, error: message };
+      set({ error: 'Failed to delete category', isLoading: false });
+      return { success: false };
     }
   },
 

@@ -14,11 +14,22 @@ import { formatCurrency } from '../utils/formatCurrency';
 const TransactionItem = ({ transaction, currency = 'LKR', onPress }) => {
   const isIncome = transaction.type === 'income';
   const cat = transaction.category || {};
+  
   const time = new Date(transaction.date).toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
   });
+
+  // Fallback to the old CategoryIcon system
+  const renderIcon = () => (
+    <CategoryIcon
+      iconKey={cat.icon || 'other'}
+      color={cat.color}
+      size={44}
+      iconSize={20}
+    />
+  );
 
   return (
     <TouchableOpacity
@@ -27,21 +38,23 @@ const TransactionItem = ({ transaction, currency = 'LKR', onPress }) => {
       activeOpacity={0.7}
     >
       <View style={styles.leftIcon}>
-        <CategoryIcon
-          iconKey={cat.icon || 'other'}
-          color={cat.color}
-          size={44}
-          iconSize={20}
-        />
+        {renderIcon()}
       </View>
 
       <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={1}>{transaction.title}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.title} numberOfLines={1}>{transaction.title}</Text>
+          {transaction.isRecurring && (
+            <View style={styles.recurringBadge}>
+              <MaterialCommunityIcons name="repeat" size={10} color={colors.textOnDark} />
+            </View>
+          )}
+        </View>
         <Text style={styles.time}>{time}</Text>
       </View>
 
-      <Text style={[styles.amount, { color: isIncome ? colors.success : colors.text }]}>
-        {isIncome ? '+' : '-'} {formatCurrency(transaction.amount, currency)}
+      <Text style={[styles.amount, { color: isIncome ? colors.success : colors.danger }]}>
+        {isIncome ? '+' : '-'}{formatCurrency(transaction.amount, currency)}
       </Text>
     </TouchableOpacity>
   );
@@ -72,6 +85,15 @@ const styles = StyleSheet.create({
   amount: {
     ...typography.bodySemibold,
     fontSize: 16,
+  },
+  recurringBadge: {
+    backgroundColor: colors.primaryDark,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 6,
   },
 });
 
