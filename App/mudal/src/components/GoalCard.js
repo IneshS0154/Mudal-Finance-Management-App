@@ -3,61 +3,73 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../constants/colors';
 import typography from '../constants/typography';
-import ProgressBar from './ProgressBar';
+import CategoryIcon from './CategoryIcon';
 import { formatCurrency } from '../utils/formatCurrency';
 
-const GoalCard = ({ goal, currency = 'LKR', onPress }) => {
-  const progress = goal.targetAmount > 0 ? goal.savedAmount / goal.targetAmount : 0;
+const GoalCard = ({ goal, currency, onPress }) => {
+  const progress = Math.min(goal.currentAmount / goal.targetAmount, 1);
   const percentage = Math.round(progress * 100);
-  const daysLeft = Math.max(0, Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24)));
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      <View style={styles.topRow}>
-        <View style={styles.iconCircle}>
-          <Ionicons name="flag" size={18} color={colors.primaryDark} />
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
+      <View style={styles.header}>
+        <CategoryIcon 
+          iconKey={goal.category?.icon || 'goal'} 
+          color={goal.category?.color || colors.primary} 
+          size={48} 
+          iconSize={22} 
+        />
+        <View style={styles.titleArea}>
+          <Text style={styles.title}>{goal.title}</Text>
+          <Text style={styles.status}>
+            {goal.status === 'completed' ? 'Target Reached!' : `${goal.durationMonths} months plan`}
+          </Text>
         </View>
-        <View style={styles.info}>
-          <Text style={styles.goalName}>{goal.name}</Text>
-          <Text style={styles.daysLeft}>{daysLeft} days left</Text>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{percentage}%</Text>
         </View>
-        <Text style={styles.percentage}>{percentage}%</Text>
       </View>
 
-      <ProgressBar
-        progress={Math.min(progress, 1)}
-        color={colors.primary}
-        height={6}
-        style={styles.progressBar}
-      />
+      <View style={styles.progressSection}>
+        <View style={styles.progressLabels}>
+          <Text style={styles.current}>{formatCurrency(goal.currentAmount, currency)}</Text>
+          <Text style={styles.target}>of {formatCurrency(goal.targetAmount, currency)}</Text>
+        </View>
+        
+        <View style={styles.progressBarBg}>
+          <View style={[styles.progressBarFill, { width: `${percentage}%` }]} />
+        </View>
+      </View>
 
-      <View style={styles.bottomRow}>
-        <Text style={styles.saved}>{formatCurrency(goal.savedAmount, currency)} saved</Text>
-        <Text style={styles.target}>of {formatCurrency(goal.targetAmount, currency)}</Text>
+      <View style={styles.footer}>
+        <Ionicons name="calendar-outline" size={14} color={colors.textTertiary} />
+        <Text style={styles.footerText}>Next deduction: {formatCurrency(goal.monthlyDeduction, currency)}</Text>
       </View>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface, borderRadius: 18, padding: 18, marginBottom: 12,
-    shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 12, elevation: 2,
+  container: {
+    backgroundColor: colors.surface, borderRadius: 22, padding: 20, marginBottom: 16,
     borderWidth: 1, borderColor: colors.borderLight,
+    shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1, shadowRadius: 12, elevation: 2,
   },
-  topRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
-  iconCircle: {
-    width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primaryMuted,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  info: { flex: 1, marginLeft: 12 },
-  goalName: { ...typography.bodyMedium, color: colors.text },
-  daysLeft: { ...typography.caption, color: colors.textSecondary, marginTop: 2 },
-  percentage: { ...typography.h3, color: colors.primaryDark },
-  progressBar: { marginBottom: 10 },
-  bottomRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  saved: { ...typography.smallMedium, color: colors.success },
-  target: { ...typography.small, color: colors.textSecondary },
+  header: { flexDirection: 'row', alignItems: 'center' },
+  titleArea: { flex: 1, marginLeft: 12 },
+  title: { ...typography.h4, color: colors.text },
+  status: { ...typography.caption, color: colors.textSecondary, marginTop: 2 },
+  badge: { backgroundColor: colors.successLight, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  badgeText: { ...typography.smallBold, color: colors.success },
+  progressSection: { marginTop: 20 },
+  progressLabels: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 10 },
+  current: { ...typography.h3, color: colors.text },
+  target: { ...typography.caption, color: colors.textTertiary, marginLeft: 6 },
+  progressBarBg: { height: 8, backgroundColor: colors.backgroundDark, borderRadius: 4, overflow: 'hidden' },
+  progressBarFill: { height: '100%', backgroundColor: colors.success, borderRadius: 4 },
+  footer: { flexDirection: 'row', alignItems: 'center', marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.borderLight },
+  footerText: { ...typography.caption, color: colors.textTertiary, marginLeft: 6 },
 });
 
 export default GoalCard;

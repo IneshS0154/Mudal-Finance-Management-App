@@ -5,7 +5,7 @@ import colors from '../constants/colors';
 import typography from '../constants/typography';
 import { formatCurrency } from '../utils/formatCurrency';
 
-const BalanceCard = ({ balance = 0, income = 0, expense = 0, currency = 'LKR', cardNumber = '9934', validThru = '05/28' }) => {
+const BalanceCard = ({ balance = 0, income = 0, expense = 0, currency = 'LKR' }) => {
   const [hidden, setHidden] = useState(false);
 
   return (
@@ -32,17 +32,7 @@ const BalanceCard = ({ balance = 0, income = 0, expense = 0, currency = 'LKR', c
           </TouchableOpacity>
         </View>
 
-        {/* Card details row */}
-        <View style={styles.detailsRow}>
-          <View>
-            <Text style={styles.detailLabel}>Account number</Text>
-            <Text style={styles.detailValue}>**** {cardNumber}</Text>
-          </View>
-          <View style={styles.detailRight}>
-            <Text style={styles.detailLabel}>Valid Thru</Text>
-            <Text style={styles.detailValue}>{validThru}</Text>
-          </View>
-        </View>
+
       </View>
 
       {/* Income / Expense row below card */}
@@ -132,25 +122,7 @@ const styles = StyleSheet.create({
   eyeBtn: {
     padding: 6,
   },
-  detailsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: colors.borderLight,
-    paddingTop: 16,
-  },
-  detailRight: {
-    alignItems: 'flex-end',
-  },
-  detailLabel: {
-    ...typography.caption,
-    color: colors.textSecondary,
-  },
-  detailValue: {
-    ...typography.smallMedium,
-    color: colors.text,
-    marginTop: 2,
-  },
+
   statsRow: {
     flexDirection: 'row',
     backgroundColor: colors.surface,

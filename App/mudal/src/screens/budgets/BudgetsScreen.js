@@ -10,6 +10,7 @@ import BudgetCard from '../../components/BudgetCard';
 import ProgressBar from '../../components/ProgressBar';
 import EmptyState from '../../components/EmptyState';
 import PillButton from '../../components/PillButton';
+import GlassSegmentedControl from '../../components/GlassSegmentedControl';
 import useBudgetStore from '../../store/budgetStore';
 import useAuthStore from '../../store/authStore';
 import { formatCurrency } from '../../utils/formatCurrency';
@@ -53,22 +54,16 @@ const BudgetsScreen = ({ navigation }) => {
         </View>
 
         {/* Pro Segment Nav */}
-        <View style={styles.segments}>
-          {SECTIONS.map((s) => (
-            <TouchableOpacity
-              key={s.key}
-              style={[styles.segment, s.key === 'budgets' && styles.segmentActive]}
-              onPress={() => {
-                if (s.key === 'recurring') navigation.navigate('Recurring');
-                if (s.key === 'goals') navigation.navigate('Goals');
-              }}
-              activeOpacity={0.8}
-            >
-              <Ionicons name={s.icon} size={16} color={s.key === 'budgets' ? colors.textOnDark : colors.textTertiary} />
-              <Text style={[styles.segmentText, s.key === 'budgets' && styles.segmentTextActive]}>{s.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <GlassSegmentedControl 
+          values={SECTIONS.map(s => s.label)}
+          selectedIndex={0}
+          onChange={(index) => {
+            const s = SECTIONS[index];
+            if (s.key === 'recurring') navigation.navigate('Recurring');
+            if (s.key === 'goals') navigation.navigate('Goals');
+          }}
+          style={{ marginTop: 8 }}
+        />
 
         {/* Overview */}
         {budgets.length > 0 && (

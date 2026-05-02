@@ -19,9 +19,16 @@ const BudgetCard = ({ budget, currency = 'LKR', onPress }) => {
         <CategoryIcon iconKey={category?.icon || 'other'} color={category?.color} size={42} iconSize={20} />
         <View style={styles.info}>
           <Text style={styles.catName}>{category?.name || 'Category'}</Text>
-          <Text style={styles.remaining}>
-            {isOver ? 'Over by ' : ''}{formatCurrency(Math.abs(remaining), currency)} {isOver ? '' : 'left'}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+            <Text style={[styles.remaining, isOver && { color: colors.danger, fontWeight: '600' }]}>
+              {isOver ? 'Over by ' : ''}{formatCurrency(Math.abs(remaining), currency)} {isOver ? '' : 'left'}
+            </Text>
+            {isOver && (
+              <View style={styles.leakBadge}>
+                <Text style={styles.leakText}>LEAKING</Text>
+              </View>
+            )}
+          </View>
         </View>
         <View style={styles.amountCol}>
           <Text style={styles.spent}>{formatCurrency(spent, currency)}</Text>
@@ -59,7 +66,20 @@ const styles = StyleSheet.create({
   amountCol: { alignItems: 'flex-end' },
   spent: { ...typography.bodySemibold, color: colors.text },
   limit: { ...typography.caption, color: colors.textSecondary, marginTop: 2 },
-  progressBar: {},
+  catText: { ...typography.caption, color: colors.textSecondary, marginTop: 6, textAlign: 'center' },
+  leakBadge: {
+    backgroundColor: colors.danger,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  leakText: {
+    ...typography.caption,
+    color: colors.textOnDark,
+    fontSize: 8,
+    fontWeight: '800',
+  },
 });
 
 export default BudgetCard;

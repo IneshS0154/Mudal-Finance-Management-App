@@ -8,10 +8,17 @@ import CategoryIcon from '../../components/CategoryIcon';
 import EmptyState from '../../components/EmptyState';
 import PillButton from '../../components/PillButton';
 import useCategoryStore from '../../store/categoryStore';
+import useRecurringStore from '../../store/recurringStore';
+import RecurringItem from '../../components/RecurringItem';
 
 const CategoriesScreen = ({ navigation }) => {
   const { categories, fetchCategories, deleteCategory } = useCategoryStore();
-  useEffect(() => { fetchCategories(); }, []);
+  const { recurringItems, fetchRecurring, deleteRecurring } = useRecurringStore();
+
+  useEffect(() => { 
+    fetchCategories(); 
+    fetchRecurring();
+  }, []);
 
   const expenseCategories = categories.filter((c) => c.type === 'expense');
   const incomeCategories = categories.filter((c) => c.type === 'income');
@@ -54,6 +61,38 @@ const CategoriesScreen = ({ navigation }) => {
           <>
             {expenseCategories.length > 0 && renderGroup('Expense Categories', expenseCategories)}
             {incomeCategories.length > 0 && renderGroup('Income Categories', incomeCategories)}
+
+            {/* Recurring Section */}
+            <View style={styles.group}>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.groupTitle}>Recurring Payments</Text>
+                <TouchableOpacity 
+                  onPress={() => navigation.navigate('AddRecurring')}
+                  style={styles.addSmallBtn}
+                >
+                  <Ionicons name="add" size={20} color={colors.primaryDark} />
+                </TouchableOpacity>
+              </View>
+              {recurringItems.length > 0 ? (
+                recurringItems.map((item) => (
+                  <RecurringItem 
+                    key={item._id} 
+                    item={item} 
+                    onEdit={() => navigation.navigate('AddRecurring', { recurring: item })}
+                    onDelete={() => {
+                      Alert.alert('Delete', 'Remove this recurring payment?', [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Delete', style: 'destructive', onPress: () => deleteRecurring(item._id) },
+                      ]);
+                    }}
+                  />
+                ))
+              ) : (
+                <View style={styles.emptyRecurring}>
+                  <Text style={styles.emptyRecurringText}>No recurring payments set up yet.</Text>
+                </View>
+              )}
+            </View>
           </>
         ) : (
           <EmptyState icon="grid-outline" title="No Categories" subtitle="Add custom categories to organize your transactions">
@@ -77,6 +116,19 @@ const styles = StyleSheet.create({
   catName: { flex: 1, ...typography.bodyMedium, color: colors.text, marginLeft: 14 },
   deleteBtn: { padding: 8 },
   divider: { height: 1, backgroundColor: colors.borderLight },
+  sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  addSmallBtn: { 
+    width: 32, height: 32, borderRadius: 10, 
+    backgroundColor: colors.primaryMuted, 
+    alignItems: 'center', justifyContent: 'center' 
+  },
+  emptyRecurring: {
+    padding: 20, backgroundColor: colors.surface, 
+    borderRadius: 16, borderStyle: 'dashed', 
+    borderWidth: 1, borderColor: colors.border,
+    alignItems: 'center'
+  },
+  emptyRecurringText: { ...typography.caption, color: colors.textTertiary },
 });
 
 export default CategoriesScreen;

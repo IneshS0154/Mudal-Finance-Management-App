@@ -8,8 +8,10 @@ import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import MiniChart from '../../components/MiniChart';
 import CategoryIcon from '../../components/CategoryIcon';
+import GlassSegmentedControl from '../../components/GlassSegmentedControl';
 import useTransactionStore from '../../store/transactionStore';
 import useAuthStore from '../../store/authStore';
+import useBudgetStore from '../../store/budgetStore';
 import { formatCurrency } from '../../utils/formatCurrency';
 
 const PERIODS = [
@@ -21,14 +23,20 @@ const PERIODS = [
 const AnalyticsScreen = () => {
   const { user } = useAuthStore();
   const { transactions, fetchTransactions } = useTransactionStore();
+  const { budgets, fetchBudgets } = useBudgetStore();
   const [period, setPeriod] = useState('month');
   const currency = user?.currency || 'LKR';
 
-  useEffect(() => { fetchTransactions(); }, []);
+  useEffect(() => { 
+    fetchTransactions(); 
+    fetchBudgets();
+  }, []);
 
   const expenses = transactions.filter((t) => t.type === 'expense');
   const totalExpense = expenses.reduce((s, t) => s + t.amount, 0);
   const totalIncome = transactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const totalBudget = budgets.reduce((s, b) => s + b.limit, 0);
+  const totalBudgetSpent = budgets.reduce((s, b) => s + (b.spent || 0), 0);
 
   // Category breakdown
   const categoryMap = {};
@@ -39,7 +47,36 @@ const AnalyticsScreen = () => {
   });
   const categoryBreakdown = Object.values(categoryMap).sort((a, b) => b.total - a.total);
 
-  const chartData = [30, 45, 25, 60, 35, 50, 40, 55, 30, 45, 65, 35];
+  // Generate chart data based on transactions
+  const getChartData = () => {
+    const now = new Date();
+    const days = period === 'week' ? 7 : period === 'month' ? 30 : 12;
+    const data = new Array(days).fill(0);
+    
+    if (period === 'year') {
+      expenses.forEach(t => {
+        const d = new Date(t.date);
+        if (d.getFullYear() === now.getFullYear()) {
+          data[d.getMonth()] += t.amount;
+        }
+      });
+    } else {
+      expenses.forEach(t => {
+        const d = new Date(t.date);
+        const diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+        if (diff >= 0 && diff < days) {
+          data[(days - 1) - diff] += t.amount;
+        }
+      });
+    }
+    
+    // Ensure at least 2 points and avoid all zeros for the chart component
+    if (data.every(v => v === 0)) return [0, 0, 0, 0, 0];
+    return data;
+  };
+
+  const chartData = getChartData();
+  const budgetUsage = totalBudget > 0 ? (totalBudgetSpent / totalBudget) * 100 : 0;
 
   return (
     <ScreenWrapper backgroundColor={colors.background}>
@@ -56,30 +93,52 @@ const AnalyticsScreen = () => {
               <Text style={styles.summaryLabel}>Total Spending</Text>
               <Text style={styles.summaryAmount}>{formatCurrency(totalExpense, currency)}</Text>
             </View>
-            <View style={styles.changeChip}>
-              <Ionicons name="trending-down" size={14} color={colors.danger} />
-              <Text style={styles.changeText}>-12%</Text>
+            <View style={[styles.changeChip, totalIncome > totalExpense ? styles.gainChip : styles.lossChip]}>
+              <Ionicons 
+                name={totalIncome > totalExpense ? "trending-up" : "trending-down"} 
+                size={14} 
+                color={totalIncome > totalExpense ? colors.success : colors.danger} 
+              />
+              <Text style={[styles.changeText, { color: totalIncome > totalExpense ? colors.success : colors.danger }]}>
+                {totalIncome > 0 ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) : 0}%
+              </Text>
             </View>
           </View>
 
           {/* Period Selector */}
-          <View style={styles.periodRow}>
-            {PERIODS.map((p) => (
-              <TouchableOpacity
-                key={p.key}
-                style={[styles.periodBtn, period === p.key && styles.periodBtnActive]}
-                onPress={() => setPeriod(p.key)}
-              >
-                <Text style={[styles.periodText, period === p.key && styles.periodTextActive]}>{p.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <GlassSegmentedControl
+            values={PERIODS.map(p => p.label)}
+            selectedIndex={PERIODS.findIndex(p => p.key === period)}
+            onChange={(index) => setPeriod(PERIODS[index].key)}
+            style={{ marginHorizontal: 0, marginBottom: 16 }}
+          />
 
           {/* Chart */}
           <View style={styles.chartContainer}>
             <MiniChart data={chartData} width={320} height={120} color={colors.primary} />
           </View>
         </View>
+        
+        {/* Budget Usage Card */}
+        {totalBudget > 0 && (
+          <View style={styles.budgetCard}>
+            <View style={styles.budgetHeader}>
+              <Text style={styles.budgetTitle}>Budget Usage</Text>
+              <Text style={[styles.budgetPct, budgetUsage > 100 && { color: colors.danger }]}>
+                {Math.round(budgetUsage)}%
+              </Text>
+            </View>
+            <View style={styles.budgetBarTrack}>
+              <View style={[
+                styles.budgetBarFill, 
+                { width: `${Math.min(budgetUsage, 100)}%`, backgroundColor: budgetUsage > 100 ? colors.danger : colors.primaryDark }
+              ]} />
+            </View>
+            <Text style={styles.budgetNote}>
+              {formatCurrency(totalBudgetSpent, currency)} spent of {formatCurrency(totalBudget, currency)} total budget
+            </Text>
+          </View>
+        )}
 
         {/* Income vs Expense */}
         <View style={styles.compRow}>
@@ -142,10 +201,12 @@ const styles = StyleSheet.create({
   summaryLabel: { ...typography.small, color: colors.textSecondary },
   summaryAmount: { ...typography.amountLarge, fontSize: 30, color: colors.text, marginTop: 4 },
   changeChip: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.dangerLight,
+    flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, gap: 4,
   },
-  changeText: { ...typography.smallMedium, color: colors.danger },
+  gainChip: { backgroundColor: colors.successLight },
+  lossChip: { backgroundColor: colors.dangerLight },
+  changeText: { ...typography.smallMedium },
   periodRow: { flexDirection: 'row', gap: 6, marginBottom: 16 },
   periodBtn: {
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10,
@@ -163,6 +224,18 @@ const styles = StyleSheet.create({
   compDot: { width: 10, height: 10, borderRadius: 5, marginBottom: 8 },
   compLabel: { ...typography.caption, color: colors.textSecondary },
   compValue: { ...typography.h3, color: colors.text, marginTop: 4 },
+  
+  budgetCard: {
+    backgroundColor: colors.surface, marginHorizontal: 20, borderRadius: 20, padding: 20, marginBottom: 24,
+    borderWidth: 1, borderColor: colors.borderLight,
+  },
+  budgetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  budgetTitle: { ...typography.bodySemibold, color: colors.text },
+  budgetPct: { ...typography.h4, color: colors.primaryDark },
+  budgetBarTrack: { height: 8, borderRadius: 4, backgroundColor: colors.backgroundDark, marginBottom: 10 },
+  budgetBarFill: { height: 8, borderRadius: 4 },
+  budgetNote: { ...typography.caption, color: colors.textSecondary },
+
   breakdownSection: { paddingHorizontal: 20 },
   breakdownTitle: { ...typography.h3, color: colors.text, marginBottom: 12 },
   breakdownCard: {

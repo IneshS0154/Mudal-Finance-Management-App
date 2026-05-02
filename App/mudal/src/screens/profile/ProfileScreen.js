@@ -16,9 +16,10 @@ import PillButton from '../../components/PillButton';
 import useAuthStore from '../../store/authStore';
 
 const MENU_ITEMS = [
+  { key: 'salary', icon: 'cash-outline', iconBg: colors.primaryMuted, iconColor: colors.primaryDark, label: 'Salary Settings', screen: 'SalarySettings' },
   { key: 'categories', icon: 'grid-outline', iconBg: colors.successLight, iconColor: colors.success, label: 'Categories', screen: 'Categories' },
-  { key: 'edit', icon: 'person-outline', iconBg: colors.primaryMuted, iconColor: colors.primaryDark, label: 'Edit Profile', screen: 'EditProfile' },
-  { key: 'password', icon: 'lock-closed-outline', iconBg: colors.warningLight, iconColor: colors.warning, label: 'Security & Password', screen: 'ChangePassword' },
+  { key: 'edit', icon: 'person-outline', iconBg: colors.secondaryMuted || colors.backgroundDark, iconColor: colors.text, label: 'Edit Profile', screen: 'EditProfile' },
+  { key: 'password', icon: 'lock-closed-outline', iconBg: colors.primaryLight, iconColor: colors.primary, label: 'Security & Password', screen: 'ChangePassword' },
 ];
 
 const ProfileScreen = ({ navigation }) => {
@@ -52,7 +53,13 @@ const ProfileScreen = ({ navigation }) => {
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>{user?.name || 'User'}</Text>
-              <Text style={styles.userEmail}>{user?.email || ''}</Text>
+              {user?.occupation ? (
+                <Text style={styles.userOccupation}>{user.occupation}</Text>
+              ) : (
+                <Text style={styles.userSalary}>
+                  Salary: {user?.currency || 'LKR'} {user?.monthlySalary?.toLocaleString() || '0'}
+                </Text>
+              )}
             </View>
             <TouchableOpacity
               style={styles.editPill}
@@ -126,6 +133,8 @@ const styles = StyleSheet.create({
   avatarText: { ...typography.h3, color: colors.textOnDark, fontSize: 18 },
   profileInfo: { flex: 1, marginLeft: 14 },
   userName: { ...typography.h4, color: colors.text },
+  userOccupation: { ...typography.small, color: colors.textSecondary, marginTop: 2 },
+  userSalary: { ...typography.small, color: colors.primaryDark, marginTop: 2, fontWeight: '600' },
   userEmail: { ...typography.small, color: colors.textSecondary, marginTop: 2 },
   editPill: {
     backgroundColor: colors.backgroundDark, paddingHorizontal: 14, paddingVertical: 8,

@@ -26,7 +26,13 @@ const AddBudgetScreen = ({ navigation, route }) => {
   const handleSave = async () => {
     if (!limit || parseFloat(limit) <= 0) { Alert.alert('Invalid Amount', 'Enter a valid budget limit'); return; }
     if (!selectedCategory) { Alert.alert('No Category', 'Select a category'); return; }
-    const payload = { category: selectedCategory._id, limit: parseFloat(limit), month: new Date().toISOString() };
+    const now = new Date();
+    const payload = { 
+      category: selectedCategory, 
+      limit: parseFloat(limit), 
+      month: now.getMonth() + 1,
+      year: now.getFullYear()
+    };
     const result = editBudget ? await updateBudget(editBudget._id, payload) : await addBudget(payload);
     if (result.success) navigation.goBack(); else Alert.alert('Error', result.error);
   };

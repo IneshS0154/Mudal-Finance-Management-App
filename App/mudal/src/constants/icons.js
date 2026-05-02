@@ -39,6 +39,7 @@ const categoryIcons = {
   books: 'book-open-variant',
   coffee: 'coffee',
   restaurant: 'food-fork-drink',
+  goal: 'flag-variant',
 };
 
 // Available icons for the category icon picker

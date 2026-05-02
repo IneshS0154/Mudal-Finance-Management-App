@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import storage from '../utils/storage';
 import client from '../api/client';
 
 // ── Mock mode: set to true to bypass backend ──
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 const MOCK_USER = {
   _id: 'mock_user_001',
@@ -26,7 +26,7 @@ const useAuthStore = create((set, get) => ({
   // Initialize — check for stored token on app launch
   initialize: async () => {
     try {
-      const token = await SecureStore.getItemAsync('authToken');
+      const token = await storage.getItemAsync('authToken');
       if (token) {
         if (USE_MOCK) {
           set({ user: MOCK_USER, token, isCheckingAuth: false });
@@ -34,12 +34,12 @@ const useAuthStore = create((set, get) => ({
         }
         client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         const { data } = await client.get('/users/profile');
-        set({ user: data, token, isCheckingAuth: false });
+        set({ user: data.data, token, isCheckingAuth: false });
       } else {
         set({ isCheckingAuth: false });
       }
     } catch (err) {
-      await SecureStore.deleteItemAsync('authToken');
+      await storage.deleteItemAsync('authToken');
       delete client.defaults.headers.common['Authorization'];
       set({ user: null, token: null, isCheckingAuth: false });
     }
@@ -51,7 +51,7 @@ const useAuthStore = create((set, get) => ({
 
     if (USE_MOCK) {
       const mockUser = { ...MOCK_USER, name, email, currency: currency || 'LKR' };
-      await SecureStore.setItemAsync('authToken', MOCK_TOKEN);
+      await storage.setItemAsync('authToken', MOCK_TOKEN);
       set({ user: mockUser, token: MOCK_TOKEN, isLoading: false });
       return { success: true };
     }
@@ -59,7 +59,7 @@ const useAuthStore = create((set, get) => ({
     try {
       const { data } = await client.post('/auth/register', { name, email, password, currency: currency || 'LKR' });
       const { token, user } = data;
-      await SecureStore.setItemAsync('authToken', token);
+      await storage.setItemAsync('authToken', token);
       client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       set({ user, token, isLoading: false });
       return { success: true };
@@ -78,7 +78,7 @@ const useAuthStore = create((set, get) => ({
       // Simulate delay
       await new Promise((r) => setTimeout(r, 600));
       if (email === 'user@mail.com' && password === 'user1234') {
-        await SecureStore.setItemAsync('authToken', MOCK_TOKEN);
+        await storage.setItemAsync('authToken', MOCK_TOKEN);
         set({ user: MOCK_USER, token: MOCK_TOKEN, isLoading: false });
         return { success: true };
       }
@@ -90,7 +90,7 @@ const useAuthStore = create((set, get) => ({
     try {
       const { data } = await client.post('/auth/login', { email, password });
       const { token, user } = data;
-      await SecureStore.setItemAsync('authToken', token);
+      await storage.setItemAsync('authToken', token);
       client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       set({ user, token, isLoading: false });
       return { success: true };
@@ -103,7 +103,7 @@ const useAuthStore = create((set, get) => ({
 
   // Logout
   logout: async () => {
-    await SecureStore.deleteItemAsync('authToken');
+    await storage.deleteItemAsync('authToken');
     delete client.defaults.headers.common['Authorization'];
     set({ user: null, token: null, error: null });
   },
@@ -118,7 +118,7 @@ const useAuthStore = create((set, get) => ({
     }
     try {
       const { data } = await client.put('/users/profile', updates);
-      set({ user: data, isLoading: false });
+      set({ user: data.data, isLoading: false });
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.message || 'Update failed';
@@ -150,13 +150,13 @@ const useAuthStore = create((set, get) => ({
   deleteAccount: async () => {
     set({ isLoading: true, error: null });
     if (USE_MOCK) {
-      await SecureStore.deleteItemAsync('authToken');
+      await storage.deleteItemAsync('authToken');
       set({ user: null, token: null, isLoading: false });
       return { success: true };
     }
     try {
       await client.delete('/users/account');
-      await SecureStore.deleteItemAsync('authToken');
+      await storage.deleteItemAsync('authToken');
       delete client.defaults.headers.common['Authorization'];
       set({ user: null, token: null, isLoading: false });
       return { success: true };
