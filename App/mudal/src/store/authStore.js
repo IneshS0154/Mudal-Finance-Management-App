@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import storage from '../utils/storage';
-import client from '../api/client';
+import client, { getApiErrorMessage } from '../api/client';
 
 // ── Mock mode: set to true to bypass backend ──
 const USE_MOCK = false;
@@ -64,7 +64,7 @@ const useAuthStore = create((set, get) => ({
       set({ user, token, isLoading: false });
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.message || 'Registration failed';
+      const message = getApiErrorMessage(err, 'Registration failed');
       set({ error: message, isLoading: false });
       return { success: false, error: message };
     }
@@ -95,7 +95,7 @@ const useAuthStore = create((set, get) => ({
       set({ user, token, isLoading: false });
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.message || 'Invalid email or password';
+      const message = getApiErrorMessage(err, 'Invalid email or password');
       set({ error: message, isLoading: false });
       return { success: false, error: message };
     }
@@ -121,7 +121,7 @@ const useAuthStore = create((set, get) => ({
       set({ user: data.data, isLoading: false });
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.message || 'Update failed';
+      const message = getApiErrorMessage(err, 'Update failed');
       set({ error: message, isLoading: false });
       return { success: false, error: message };
     }
@@ -140,7 +140,7 @@ const useAuthStore = create((set, get) => ({
       set({ isLoading: false });
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.message || 'Password change failed';
+      const message = getApiErrorMessage(err, 'Password change failed');
       set({ error: message, isLoading: false });
       return { success: false, error: message };
     }
@@ -161,7 +161,7 @@ const useAuthStore = create((set, get) => ({
       set({ user: null, token: null, isLoading: false });
       return { success: true };
     } catch (err) {
-      const message = err.response?.data?.message || 'Account deletion failed';
+      const message = getApiErrorMessage(err, 'Account deletion failed');
       set({ error: message, isLoading: false });
       return { success: false, error: message };
     }

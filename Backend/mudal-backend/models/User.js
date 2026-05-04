@@ -1,72 +1,45 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
-const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Please add a name'],
+const categorySchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    icon: { type: String, default: 'other' },
+    color: { type: String, default: '#B2BEC3' },
+    type: { type: String, enum: ['expense', 'income'], required: true },
   },
-  email: {
-    type: String,
-    required: [true, 'Please add an email'],
-    unique: true,
-    match: [
-      /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-      'Please add a valid email',
-    ],
-  },
-  password: {
-    type: String,
-    required: [true, 'Please add a password'],
-    minlength: 6,
-    select: false,
-  },
-  currency: {
-    type: String,
-    default: 'LKR',
-  },
-  monthlySalary: {
-    type: Number,
-    default: 0,
-  },
-  salarySettings: {
+  { _id: true }
+);
+
+const salarySettingsSchema = new mongoose.Schema(
+  {
     autoAdd: { type: Boolean, default: false },
-    payday: { type: Number, default: 1 },
+    payday: { type: Number, min: 1, max: 31, default: 1 },
   },
-  occupation: {
-    type: String,
-    default: '',
+  { _id: false }
+);
+
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    password: { type: String, required: true, select: false },
+    currency: { type: String, default: 'LKR', trim: true },
+    occupation: { type: String, default: '', trim: true },
+    phoneNumber: { type: String, default: '', trim: true },
+    monthlySalary: { type: Number, default: 0 },
+    salarySettings: { type: salarySettingsSchema, default: () => ({}) },
+    categories: { type: [categorySchema], default: [] },
   },
-  phoneNumber: {
-    type: String,
-    default: '',
-  },
-  categories: [
-    {
-      name: { type: String, required: true },
-      icon: { type: String, default: 'help-circle' },
-      color: { type: String, default: '#A0A0A0' },
-      type: { type: String, enum: ['expense', 'income'], default: 'expense' },
-    }
-  ],
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  { timestamps: true }
+);
+
+userSchema.set('toJSON', {
+  virtuals: true,
+  transform(_doc, ret) {
+    delete ret.password;
+    delete ret.__v;
+    return ret;
   },
 });
 
-// Encrypt password using bcrypt
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    next();
-  }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-});
-
-// Match user entered password to hashed password in database
-UserSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
-
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', userSchema);
