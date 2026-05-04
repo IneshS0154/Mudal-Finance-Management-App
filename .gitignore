@@ -1,2 +1,3 @@
 app/mudal/node_modules
 Backend/mudal-backend/node_modules
+Backend/mudal-backend/.env
