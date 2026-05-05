@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import MiniChart from '../../components/MiniChart';
@@ -21,6 +21,8 @@ const PERIODS = [
 ];
 
 const AnalyticsScreen = () => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { user } = useAuthStore();
   const { transactions, fetchTransactions } = useTransactionStore();
   const { budgets, fetchBudgets } = useBudgetStore();
@@ -188,7 +190,7 @@ const AnalyticsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
   header: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 16 },
   headerTitle: { ...typography.h1, color: colors.text },

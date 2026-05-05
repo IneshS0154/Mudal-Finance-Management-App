@@ -7,15 +7,16 @@ import {
   TouchableOpacity,
   Alert,
   StatusBar,
+  Switch,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import PillButton from '../../components/PillButton';
 import useAuthStore from '../../store/authStore';
+import useThemeStore from '../../store/themeStore';
 
-const MENU_ITEMS = [
+const getMenuItems = (colors) => [
   { key: 'salary', icon: 'cash-outline', iconBg: colors.primaryMuted, iconColor: colors.primaryDark, label: 'Salary Settings', screen: 'SalarySettings' },
   { key: 'categories', icon: 'grid-outline', iconBg: colors.successLight, iconColor: colors.success, label: 'Categories', screen: 'Categories' },
   { key: 'edit', icon: 'person-outline', iconBg: colors.secondaryMuted || colors.backgroundDark, iconColor: colors.text, label: 'Edit Profile', screen: 'EditProfile' },
@@ -24,6 +25,9 @@ const MENU_ITEMS = [
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout } = useAuthStore();
+  const { isDarkMode, toggleTheme, colors } = useThemeStore();
+  const styles = getStyles(colors);
+  const MENU_ITEMS = getMenuItems(colors);
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -43,6 +47,17 @@ const ProfileScreen = ({ navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>My Profile</Text>
+          <View style={styles.themeSwitch}>
+            <Ionicons name="sunny-outline" size={16} color={colors.textSecondary} style={{ marginRight: 4 }} />
+            <Switch
+              value={isDarkMode}
+              onValueChange={toggleTheme}
+              trackColor={{ false: colors.borderLight, true: colors.primaryDark }}
+              thumbColor={colors.surface}
+              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+            />
+            <Ionicons name="moon-outline" size={16} color={colors.textSecondary} style={{ marginLeft: 4 }} />
+          </View>
         </View>
 
         {/* Profile Card */}
@@ -114,10 +129,19 @@ const ProfileScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
-  header: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 20, alignItems: 'center' },
+  header: { 
+    paddingHorizontal: 24, paddingTop: 8, paddingBottom: 20, 
+    alignItems: 'center', justifyContent: 'center', flexDirection: 'row'
+  },
   headerTitle: { ...typography.h2, color: colors.text },
+  themeSwitch: {
+    position: 'absolute',
+    right: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   profileCard: {
     backgroundColor: colors.surface, marginHorizontal: 20, borderRadius: 22, padding: 20,
     shadowColor: colors.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 1, shadowRadius: 16, elevation: 3,

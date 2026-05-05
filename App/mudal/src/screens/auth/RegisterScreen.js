@@ -11,7 +11,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import InputField from '../../components/InputField';
@@ -21,6 +21,8 @@ import useAuthStore from '../../store/authStore';
 const CURRENCIES = ['LKR', 'USD', 'EUR', 'GBP', 'INR'];
 
 const RegisterScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { register, isLoading } = useAuthStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -86,7 +88,7 @@ const RegisterScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingHorizontal: 24, paddingBottom: 40 },
   backBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', marginTop: 8, borderWidth: 1, borderColor: colors.borderLight },
   headerSection: { marginTop: 24, marginBottom: 28 },

@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 import CategoryIcon from './CategoryIcon';
 import { formatCurrency } from '../utils/formatCurrency';
 
-const RecurringItem = ({ item, currency = 'LKR', onPress, onEdit, onDelete }) => {
+const RecurringItem = ({ item, currency = 'LKR', onPress }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const cat = item.category || {};
   const dueDate = new Date(item.nextDueDate);
   const daysUntil = Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24));
@@ -52,37 +54,17 @@ const RecurringItem = ({ item, currency = 'LKR', onPress, onEdit, onDelete }) =>
         <Text style={styles.dueText}>{dueLabel}</Text>
       </View>
 
-      {/* Right side: amount + action icons */}
+      {/* Right side: amount */}
       <View style={styles.right}>
         <Text style={[styles.amount, isIncome ? styles.amountIncome : styles.amountExpense]}>
           {isIncome ? '+' : '-'}{formatCurrency(item.amount, currency)}
         </Text>
-
-        <View style={styles.actionRow}>
-          {/* Edit icon */}
-          <TouchableOpacity
-            style={[styles.iconBtn, styles.iconBtnEdit]}
-            onPress={(e) => { e.stopPropagation?.(); onEdit && onEdit(); }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="pencil" size={13} color={colors.primaryDark} />
-          </TouchableOpacity>
-
-          {/* Delete icon */}
-          <TouchableOpacity
-            style={[styles.iconBtn, styles.iconBtnDelete]}
-            onPress={(e) => { e.stopPropagation?.(); onDelete && onDelete(); }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="trash-outline" size={13} color={colors.danger} />
-          </TouchableOpacity>
-        </View>
       </View>
     </TouchableOpacity>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
     borderRadius: 18, padding: 14, marginBottom: 10,
@@ -115,14 +97,6 @@ const styles = StyleSheet.create({
   amount: { ...typography.bodySemibold, textAlign: 'right' },
   amountExpense: { color: colors.danger },
   amountIncome: { color: colors.success },
-
-  actionRow: { flexDirection: 'row', gap: 6 },
-  iconBtn: {
-    width: 28, height: 28, borderRadius: 8,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  iconBtnEdit: { backgroundColor: colors.primaryMuted },
-  iconBtnDelete: { backgroundColor: colors.dangerLight },
 });
 
 export default RecurringItem;

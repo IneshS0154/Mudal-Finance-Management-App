@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 
 const TABS = [
@@ -15,6 +15,8 @@ const TABS = [
 ];
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const { colors, isDarkMode } = useThemeStore();
+  const styles = getStyles(colors, isDarkMode);
   const activeIndex = state.index;
 
   const txRoute = state.routes[2];
@@ -29,8 +31,8 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
         <View style={styles.glassContainer}>
           {/* Real blur layer - high intensity for thick liquid glass */}
           <BlurView
-            intensity={100}
-            tint="light"
+            intensity={isDarkMode ? 50 : 100}
+            tint={isDarkMode ? 'dark' : 'light'}
             style={StyleSheet.absoluteFill}
           />
           {/* Specular highlights and refraction overlay */}
@@ -122,7 +124,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                   <View style={[styles.centerCircle, isActive && styles.centerCircleActive]}>
                     <BlurView 
                       intensity={isActive ? 0 : 80} 
-                      tint="light" 
+                      tint={isDarkMode ? 'dark' : 'light'} 
                       style={StyleSheet.absoluteFill} 
                     />
                     <View style={[styles.centerLiquid, isActive && styles.centerLiquidActive]} />
@@ -146,7 +148,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors, isDarkMode) => StyleSheet.create({
   wrapper: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 24 : 16,
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
       ios: {
         shadowColor: '#000000',
         shadowOffset: { width: 0, height: 16 },
-        shadowOpacity: 0.2,
+        shadowOpacity: isDarkMode ? 0.4 : 0.2,
         shadowRadius: 32,
       },
       android: {
@@ -171,23 +173,23 @@ const styles = StyleSheet.create({
   glassContainer: {
     borderRadius: 36, // Maximum pill shape for a fluid drop look
     overflow: 'hidden',
-    backgroundColor: Platform.OS === 'ios' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: Platform.OS === 'ios' ? (isDarkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.05)') : (isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)'),
     // Outer border for tension surface
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.5)',
   },
   liquidRefraction: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.1)',
     // 3D specular highlight and bottom shadow for viscosity
     borderTopWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 1)',
+    borderTopColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 1)',
     borderLeftWidth: 1.5,
-    borderLeftColor: 'rgba(255, 255, 255, 0.8)',
+    borderLeftColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomColor: isDarkMode ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.2)',
     borderRightWidth: 1,
-    borderRightColor: 'rgba(255, 255, 255, 0.3)',
+    borderRightColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.3)',
     borderRadius: 36,
   },
   tabRow: {
@@ -244,8 +246,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.95)',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.1)',
   },
   centerCircleActive: {
     borderColor: 'rgba(255, 255, 255, 0.5)',
@@ -253,10 +255,10 @@ const styles = StyleSheet.create({
   },
   centerLiquid: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(168, 232, 71, 0.15)',
+    backgroundColor: isDarkMode ? 'rgba(168, 232, 71, 0.05)' : 'rgba(168, 232, 71, 0.15)',
     // Inner liquid glow and reflection
     borderTopWidth: 2,
-    borderTopColor: 'rgba(255, 255, 255, 0.8)',
+    borderTopColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 30,
@@ -264,7 +266,7 @@ const styles = StyleSheet.create({
   },
   centerLiquidActive: {
     backgroundColor: 'transparent',
-    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    borderTopColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.3)',
   },
 });
 

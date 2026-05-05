@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 import { formatCurrency } from '../utils/formatCurrency';
 
 const BalanceCard = ({ balance = 0, income = 0, expense = 0, currency = 'LKR' }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const [hidden, setHidden] = useState(false);
 
   return (
@@ -57,7 +59,7 @@ const BalanceCard = ({ balance = 0, income = 0, expense = 0, currency = 'LKR' })
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   outer: {
     marginHorizontal: 20,
     marginBottom: 20,

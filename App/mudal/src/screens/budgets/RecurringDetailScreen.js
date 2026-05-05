@@ -4,12 +4,13 @@ import {
   TouchableOpacity, Alert, StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import useRecurringStore from '../../store/recurringStore';
 import useAuthStore from '../../store/authStore';
 import { formatCurrency } from '../../utils/formatCurrency';
+import CategoryIcon from '../../components/CategoryIcon';
 
 const FREQ_ICONS = {
   daily: 'today-outline',
@@ -19,6 +20,8 @@ const FREQ_ICONS = {
 };
 
 const RecurringDetailScreen = ({ navigation, route }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const item = route.params.recurring;
   const { user } = useAuthStore();
   const { deleteRecurring, isLoading } = useRecurringStore();
@@ -70,13 +73,14 @@ const RecurringDetailScreen = ({ navigation, route }) => {
 
         {/* ── Hero Card ─────────────────────────────────── */}
         <View style={styles.heroCard}>
-          {/* Emoji circle */}
-          <View style={[styles.heroIcon, { backgroundColor: `${catColor}20` }]}>
-            {cat.icon ? (
-              <Text style={styles.heroEmoji}>{cat.icon}</Text>
-            ) : (
-              <Ionicons name="repeat" size={32} color={catColor} />
-            )}
+          {/* Icon circle */}
+          <View style={{ marginBottom: 14 }}>
+            <CategoryIcon 
+              iconKey={cat.icon || 'repeat'} 
+              color={catColor} 
+              size={72} 
+              iconSize={32} 
+            />
           </View>
 
           <Text style={styles.heroTitle}>{item.title}</Text>
@@ -101,9 +105,12 @@ const RecurringDetailScreen = ({ navigation, route }) => {
         <View style={styles.infoCard}>
 
           <View style={styles.infoRow}>
-            <View style={[styles.infoIcon, { backgroundColor: `${catColor}15` }]}>
-              <Text style={{ fontSize: 16 }}>{cat.icon || '🔄'}</Text>
-            </View>
+            <CategoryIcon 
+              iconKey={cat.icon || 'repeat'} 
+              color={catColor} 
+              size={40} 
+              iconSize={20} 
+            />
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Category</Text>
               <Text style={styles.infoValue}>{cat.name || 'Uncategorized'}</Text>
@@ -186,7 +193,7 @@ const RecurringDetailScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   // ── Header ────────────────────────────────────────────────────────────────
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -210,11 +217,6 @@ const styles = StyleSheet.create({
     shadowColor: colors.shadowMedium, shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 1, shadowRadius: 16, elevation: 3,
   },
-  heroIcon: {
-    width: 72, height: 72, borderRadius: 36,
-    alignItems: 'center', justifyContent: 'center', marginBottom: 14,
-  },
-  heroEmoji: { fontSize: 36 },
   heroTitle: { ...typography.h2, color: colors.text, marginBottom: 8, textAlign: 'center' },
   heroAmount: { fontSize: 32, fontWeight: '700', marginBottom: 12, letterSpacing: -0.5 },
   amountIncome: { color: colors.success },

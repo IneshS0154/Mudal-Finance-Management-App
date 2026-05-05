@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, StatusBar, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import InputField from '../../components/InputField';
@@ -11,6 +11,8 @@ import useAuthStore from '../../store/authStore';
 const DAYS = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
 const SalarySettingsScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { user, updateProfile, isLoading } = useAuthStore();
   
   const [salary, setSalary] = useState(user?.monthlySalary?.toString() || '0');
@@ -101,7 +103,7 @@ const SalarySettingsScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 },
   backBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.borderLight },
   headerTitle: { ...typography.h3, color: colors.text },

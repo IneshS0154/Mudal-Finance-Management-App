@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 import CategoryIcon from './CategoryIcon';
 import { formatCurrency } from '../utils/formatCurrency';
 
 const GoalCard = ({ goal, currency, onPress }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const progress = Math.min(goal.currentAmount / goal.targetAmount, 1);
   const percentage = Math.round(progress * 100);
 
@@ -49,7 +51,7 @@ const GoalCard = ({ goal, currency, onPress }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     backgroundColor: colors.surface, borderRadius: 22, padding: 20, marginBottom: 16,
     borderWidth: 1, borderColor: colors.borderLight,

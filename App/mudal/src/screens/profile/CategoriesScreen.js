@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import CategoryIcon from '../../components/CategoryIcon';
@@ -12,6 +12,8 @@ import useRecurringStore from '../../store/recurringStore';
 import RecurringItem from '../../components/RecurringItem';
 
 const CategoriesScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { categories, fetchCategories, deleteCategory } = useCategoryStore();
   const { recurringItems, fetchRecurring, deleteRecurring } = useRecurringStore();
 
@@ -78,13 +80,6 @@ const CategoriesScreen = ({ navigation }) => {
                   <RecurringItem 
                     key={item._id} 
                     item={item} 
-                    onEdit={() => navigation.navigate('AddRecurring', { recurring: item })}
-                    onDelete={() => {
-                      Alert.alert('Delete', 'Remove this recurring payment?', [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Delete', style: 'destructive', onPress: () => deleteRecurring(item._id) },
-                      ]);
-                    }}
                   />
                 ))
               ) : (
@@ -104,7 +99,7 @@ const CategoriesScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
   backBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.borderLight },
   headerTitle: { ...typography.h3, color: colors.text },

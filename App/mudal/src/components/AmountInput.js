@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 
 const AmountInput = ({ value, onChangeText, currency = 'LKR' }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const symbol = { LKR: 'Rs.', USD: '$', EUR: '€', GBP: '£', INR: '₹' }[currency] || currency;
 
   return (
@@ -21,7 +23,7 @@ const AmountInput = ({ value, onChangeText, currency = 'LKR' }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',

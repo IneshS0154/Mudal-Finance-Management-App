@@ -1,14 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 
 const GlassSegmentedControl = ({ values, selectedIndex, onChange, style }) => {
+  const { colors, isDarkMode } = useThemeStore();
+  const styles = getStyles(colors, isDarkMode);
   return (
     <View style={[styles.container, style]}>
       {Platform.OS === 'ios' && (
-        <BlurView intensity={60} tint="light" style={StyleSheet.absoluteFill} />
+        <BlurView intensity={isDarkMode ? 30 : 60} tint={isDarkMode ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
       )}
       <View style={styles.liquidOverlay} />
       
@@ -33,14 +35,14 @@ const GlassSegmentedControl = ({ values, selectedIndex, onChange, style }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors, isDarkMode) => StyleSheet.create({
   container: {
     height: 48,
     borderRadius: 24,
-    backgroundColor: Platform.OS === 'ios' ? 'rgba(255, 255, 255, 0.3)' : colors.backgroundDark,
+    backgroundColor: Platform.OS === 'ios' ? (isDarkMode ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.3)') : colors.surfaceMuted,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.5)',
     marginHorizontal: 20,
     marginBottom: 20,
     ...Platform.select({
@@ -57,9 +59,9 @@ const styles = StyleSheet.create({
   },
   liquidOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.1)',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.8)',
+    borderTopColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.8)',
   },
   inner: {
     flex: 1,
