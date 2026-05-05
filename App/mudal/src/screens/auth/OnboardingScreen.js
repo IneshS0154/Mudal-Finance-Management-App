@@ -8,13 +8,15 @@ import {
   Dimensions,
 } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import PillButton from '../../components/PillButton';
 
 const { width: W, height: H } = Dimensions.get('window');
 
 const OnboardingScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -118,7 +120,7 @@ const OnboardingScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary,
@@ -296,6 +298,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   ctaButton: {
+    backgroundColor: 'rgb(255, 255, 255)',
     marginBottom: 16,
   },
   loginText: {

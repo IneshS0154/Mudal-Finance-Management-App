@@ -4,7 +4,7 @@ import {
   TouchableOpacity, RefreshControl, StatusBar, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import RecurringItem from '../../components/RecurringItem';
@@ -14,6 +14,8 @@ import useRecurringStore from '../../store/recurringStore';
 import useAuthStore from '../../store/authStore';
 
 const RecurringScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { user } = useAuthStore();
   const { recurringItems, fetchRecurring, deleteRecurring, isLoading } = useRecurringStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -27,15 +29,7 @@ const RecurringScreen = ({ navigation }) => {
     setRefreshing(false);
   }, []);
 
-  const handleDelete = (item) => {
-    Alert.alert('Delete Recurring', `Delete "${item.title}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive',
-        onPress: async () => { await deleteRecurring(item._id); },
-      },
-    ]);
-  };
+
 
   return (
     <ScreenWrapper backgroundColor={colors.background}>
@@ -65,10 +59,6 @@ const RecurringScreen = ({ navigation }) => {
                 currency={currency}
                 // Tap card → view-only detail screen
                 onPress={() => navigation.navigate('RecurringDetail', { recurring: item })}
-                // Edit icon → go directly to edit page
-                onEdit={() => navigation.navigate('AddRecurring', { recurring: item })}
-                // Delete icon → confirm then delete
-                onDelete={() => handleDelete(item)}
               />
             ))
           ) : (
@@ -102,7 +92,7 @@ const RecurringScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

@@ -21,14 +21,22 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.mudal"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-secure-store",
-      "expo-font"
-    ]
+      "expo-font",
+      "react-native-bottom-tabs",
+      "expo-router"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "566084f3-f199-4852-bfc2-542f0b04dea6"
+      }
+    }
   }
 }

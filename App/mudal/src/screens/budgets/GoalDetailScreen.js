@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import PillButton from '../../components/PillButton';
@@ -10,6 +10,8 @@ import useAuthStore from '../../store/authStore';
 import { formatCurrency } from '../../utils/formatCurrency';
 
 const GoalDetailScreen = ({ navigation, route }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { goal } = route.params;
   const { user } = useAuthStore();
   const currency = user?.currency || 'LKR';
@@ -104,7 +106,7 @@ const GoalDetailScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingBottom: 40 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 },
   backBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.borderLight },

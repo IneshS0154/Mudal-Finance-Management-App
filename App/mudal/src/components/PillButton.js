@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 
 const PillButton = ({
@@ -13,6 +13,8 @@ const PillButton = ({
   icon,
   style,
 }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const getStyle = () => {
     switch (variant) {
       case 'outline':
@@ -90,7 +92,7 @@ const PillButton = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   base: {
     borderRadius: 16,
     alignItems: 'center',

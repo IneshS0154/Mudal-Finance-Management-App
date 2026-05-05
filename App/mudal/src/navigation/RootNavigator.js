@@ -4,11 +4,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import AuthStack from './AuthStack';
 import MainTabs from './MainTabs';
 import useAuthStore from '../store/authStore';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 
 const Stack = createStackNavigator();
 
 const RootNavigator = () => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { token, isCheckingAuth, initialize } = useAuthStore();
 
   useEffect(() => {
@@ -34,7 +36,7 @@ const RootNavigator = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   loader: {
     flex: 1,
     justifyContent: 'center',

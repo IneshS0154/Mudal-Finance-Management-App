@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import AmountInput from '../../components/AmountInput';
@@ -20,6 +20,8 @@ import CategoryIcon from '../../components/CategoryIcon';
 
 
 const AddTransactionScreen = ({ navigation, route }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const initialType = route?.params?.type || 'expense';
   const editTransaction = route?.params?.transaction;
   const { user } = useAuthStore();
@@ -212,7 +214,7 @@ const AddTransactionScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8 },
   backBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.borderLight },

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import GoalCard from '../../components/GoalCard';
@@ -11,6 +11,8 @@ import useGoalStore from '../../store/goalStore';
 import useAuthStore from '../../store/authStore';
 
 const GoalsScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { user } = useAuthStore();
   const { goals, fetchGoals, isLoading, deleteGoal } = useGoalStore();
   const currency = user?.currency || 'LKR';
@@ -98,7 +100,7 @@ const GoalsScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',

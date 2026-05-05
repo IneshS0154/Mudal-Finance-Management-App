@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 import CategoryIcon from './CategoryIcon';
 import { formatCurrency } from '../utils/formatCurrency';
 
 const TransactionItem = ({ transaction, currency = 'LKR', onPress }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const isIncome = transaction.type === 'income';
   const cat = transaction.category || {};
   
@@ -60,7 +62,7 @@ const TransactionItem = ({ transaction, currency = 'LKR', onPress }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',

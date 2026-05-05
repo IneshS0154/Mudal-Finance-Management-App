@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 
 const ProgressRing = ({
   progress = 0,
@@ -10,6 +10,8 @@ const ProgressRing = ({
   color,
   children,
 }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clampedProgress = Math.max(0, Math.min(1, progress));
@@ -48,7 +50,7 @@ const ProgressRing = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     position: 'relative',
     alignItems: 'center',

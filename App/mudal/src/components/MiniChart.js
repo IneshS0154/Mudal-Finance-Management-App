@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -22,6 +22,7 @@ const MiniChart = ({
   strokeWidth = 2.5,
   style,
 }) => {
+  const { colors } = useThemeStore();
   if (data.length < 2) return null;
 
   const color = lineColor || colors.primary;

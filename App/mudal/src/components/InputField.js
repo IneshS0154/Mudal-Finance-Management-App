@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 
 const InputField = ({
@@ -17,6 +17,8 @@ const InputField = ({
   numberOfLines = 1,
   error,
 }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -55,7 +57,7 @@ const InputField = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   wrapper: { marginBottom: 16 },
   label: { ...typography.smallMedium, color: colors.text, marginBottom: 8 },
   inputContainer: {

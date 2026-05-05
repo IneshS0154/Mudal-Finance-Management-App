@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import BudgetCard from '../../components/BudgetCard';
@@ -22,6 +22,8 @@ const SECTIONS = [
 ];
 
 const BudgetsScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { user } = useAuthStore();
   const { budgets, fetchBudgets } = useBudgetStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -108,11 +110,11 @@ const BudgetsScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
   header: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerTitle: { ...typography.h1, color: colors.text },
-  headerAddBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(45, 80, 22, 0.1)', alignItems: 'center', justifyContent: 'center' },
+  headerAddBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryMuted, alignItems: 'center', justifyContent: 'center' },
   segments: {
     flexDirection: 'row', marginHorizontal: 20, backgroundColor: '#FFFFFF',
     borderRadius: 24, padding: 6, marginBottom: 24, 

@@ -9,7 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import BalanceCard from '../../components/BalanceCard';
@@ -21,6 +21,8 @@ import useTransactionStore from '../../store/transactionStore';
 import useRecurringStore from '../../store/recurringStore';
 
 const HomeScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { user } = useAuthStore();
   const { transactions, fetchTransactions, isLoading: txLoading } = useTransactionStore();
   const { recurringItems, fetchRecurring, isLoading: recLoading } = useRecurringStore();
@@ -96,7 +98,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation.navigate('TransactionsTab', { screen: 'AddTransaction', params: { type: 'expense' } })}
+            onPress={() => navigation.navigate('transactions', { screen: 'AddTransaction', params: { type: 'expense' } })}
           >
             <View style={styles.actionIconCircle}>
               <Ionicons name="arrow-up" size={18} color={colors.text} />
@@ -106,7 +108,7 @@ const HomeScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation.navigate('TransactionsTab', { screen: 'AddTransaction', params: { type: 'income' } })}
+            onPress={() => navigation.navigate('transactions', { screen: 'AddTransaction', params: { type: 'income' } })}
           >
             <View style={styles.actionIconCircle}>
               <Ionicons name="arrow-down" size={18} color={colors.text} />
@@ -116,7 +118,7 @@ const HomeScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation.navigate('BudgetsTab', { screen: 'Recurring' })}
+            onPress={() => navigation.navigate('budgets', { screen: 'Recurring' })}
           >
             <View style={styles.actionIconCircle}>
               <Ionicons name="repeat-outline" size={18} color={colors.text} />
@@ -131,14 +133,14 @@ const HomeScreen = ({ navigation }) => {
             <SectionHeader
               title="Recurring Transactions"
               actionText="See all"
-              onAction={() => navigation.navigate('BudgetsTab', { screen: 'Recurring' })}
+              onAction={() => navigation.navigate('budgets', { screen: 'Recurring' })}
             />
             {upcomingRec.map((item) => (
               <RecurringItem
                 key={item._id}
                 item={item}
                 currency={currency}
-                onPress={() => navigation.navigate('BudgetsTab', {
+                onPress={() => navigation.navigate('budgets', {
                   screen: 'RecurringDetail',
                   params: { recurring: item }
                 })}
@@ -152,7 +154,7 @@ const HomeScreen = ({ navigation }) => {
           <SectionHeader
             title="Transactions"
             actionText="View all"
-            onAction={() => navigation.navigate('TransactionsTab')}
+            onAction={() => navigation.navigate('transactions')}
           />
 
           <View style={styles.transactionCard}>
@@ -163,7 +165,7 @@ const HomeScreen = ({ navigation }) => {
                     transaction={t}
                     currency={currency}
                     onPress={() =>
-                      navigation.navigate('TransactionsTab', {
+                      navigation.navigate('transactions', {
                         screen: 'TransactionDetail',
                         params: { transaction: t },
                       })
@@ -186,7 +188,7 @@ const HomeScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   scrollContent: { paddingBottom: 20 },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',

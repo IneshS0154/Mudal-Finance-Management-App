@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import typography from '../constants/typography';
 import CategoryIcon from './CategoryIcon';
 import ProgressBar from './ProgressBar';
 import { formatCurrency } from '../utils/formatCurrency';
 
 const BudgetCard = ({ budget, currency = 'LKR', onPress }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { category, limit, spent = 0 } = budget;
   const progress = limit > 0 ? spent / limit : 0;
   const remaining = limit - spent;
@@ -45,7 +47,7 @@ const BudgetCard = ({ budget, currency = 'LKR', onPress }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
     borderRadius: 18,

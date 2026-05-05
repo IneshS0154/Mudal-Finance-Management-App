@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import AmountInput from '../../components/AmountInput';
@@ -33,6 +33,8 @@ const RECURRING_CATEGORIES = [
 ];
 
 const AddRecurringScreen = ({ navigation, route }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const edit = route?.params?.recurring;
   const { user } = useAuthStore();
   const { addRecurring, updateRecurring, deleteRecurring, isLoading } = useRecurringStore();
@@ -285,7 +287,7 @@ const AddRecurringScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   // ── Header ────────────────────────────────────────────────────────────────
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',

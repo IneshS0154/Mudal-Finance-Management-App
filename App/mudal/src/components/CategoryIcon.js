@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 import { categoryIcons } from '../constants/icons';
 
 const CategoryIcon = ({ iconKey, color, size = 40, iconSize = 20 }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const iconName = categoryIcons[iconKey] || 'help-circle-outline';
 
   return (
@@ -28,7 +30,7 @@ const CategoryIcon = ({ iconKey, color, size = 40, iconSize = 20 }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',

@@ -1,26 +1,33 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import colors from '../constants/colors';
+import useThemeStore from '../store/themeStore';
 
-const ProgressBar = ({ progress = 0, color = colors.primaryDark, height = 6, style }) => (
-  <View style={[styles.track, { height, borderRadius: height / 2 }, style]}>
-    <View
-      style={[
-        styles.fill,
-        {
-          width: `${Math.min(Math.max(progress, 0), 1) * 100}%`,
-          backgroundColor: color,
-          height,
-          borderRadius: height / 2,
-        },
-      ]}
-    />
-  </View>
-);
+const ProgressBar = ({ progress = 0, color, height = 6, style }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
+  
+  const barColor = color || colors.primaryDark;
 
-const styles = StyleSheet.create({
+  return (
+    <View style={[styles.track, { height, borderRadius: height / 2 }, style]}>
+      <View
+        style={[
+          styles.fill,
+          {
+            width: `${Math.min(Math.max(progress, 0), 1) * 100}%`,
+            backgroundColor: barColor,
+            height,
+            borderRadius: height / 2,
+          },
+        ]}
+      />
+    </View>
+  );
+};
+
+const getStyles = (colors) => StyleSheet.create({
   track: {
-    backgroundColor: colors.backgroundDark,
+    backgroundColor: colors.surfaceMuted,
     overflow: 'hidden',
   },
   fill: {},

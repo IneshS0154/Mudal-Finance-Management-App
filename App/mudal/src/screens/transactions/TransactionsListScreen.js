@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import colors from '../../constants/colors';
+import useThemeStore from '../../store/themeStore';
 import typography from '../../constants/typography';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import TransactionItem from '../../components/TransactionItem';
@@ -13,6 +13,8 @@ import EmptyState from '../../components/EmptyState';
 import PillButton from '../../components/PillButton';
 
 const TransactionsListScreen = ({ navigation }) => {
+  const { colors } = useThemeStore();
+  const styles = getStyles(colors);
   const { user } = useAuthStore();
   const { transactions, fetchTransactions, isLoading } = useTransactionStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -35,12 +37,6 @@ const TransactionsListScreen = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Activity</Text>
-        <TouchableOpacity 
-          style={styles.addBtn} 
-          onPress={() => navigation.navigate('AddTransaction')}
-        >
-          <Ionicons name="add" size={24} color={colors.textOnDark} />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
@@ -79,17 +75,12 @@ const TransactionsListScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   header: { 
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', 
     paddingHorizontal: 20, paddingTop: 10, paddingBottom: 15 
   },
   headerTitle: { ...typography.h1, color: colors.text },
-  addBtn: { 
-    width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primaryDark, 
-    alignItems: 'center', justifyContent: 'center', shadowColor: colors.primaryDeep,
-    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
-  },
   content: { flex: 1 },
   listContent: { paddingHorizontal: 20, paddingBottom: 120, paddingTop: 5 },
 });
