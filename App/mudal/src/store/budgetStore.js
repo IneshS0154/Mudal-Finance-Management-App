@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import client from '../api/client';
 
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 const MOCK_BUDGETS = [
   { _id: 'bgt_01', category: { _id: 'cat_01', name: 'Food', icon: 'food', color: '#FF6B6B' }, limit: 15000, spent: 1800 },

@@ -10,6 +10,9 @@ import ScreenWrapper from '../../components/ScreenWrapper';
 import useRecurringStore from '../../store/recurringStore';
 import useAuthStore from '../../store/authStore';
 import { formatCurrency } from '../../utils/formatCurrency';
+import CategoryIcon from '../../components/CategoryIcon';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { categoryIcons } from '../../constants/icons';
 
 const FREQ_ICONS = {
   daily: 'today-outline',
@@ -68,16 +71,16 @@ const RecurringDetailScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
 
-        {/* ── Hero Card ─────────────────────────────────── */}
+        {/* Hero Card */}
         <View style={styles.heroCard}>
-          {/* Emoji circle */}
-          <View style={[styles.heroIcon, { backgroundColor: `${catColor}20` }]}>
-            {cat.icon ? (
-              <Text style={styles.heroEmoji}>{cat.icon}</Text>
-            ) : (
+          {/* Hero Icon */}
+          {cat.icon ? (
+            <CategoryIcon iconKey={cat.icon} color={catColor} size={72} iconSize={36} />
+          ) : (
+            <View style={[styles.heroIcon, { backgroundColor: `${catColor}20` }]}>
               <Ionicons name="repeat" size={32} color={catColor} />
-            )}
-          </View>
+            </View>
+          )}
 
           <Text style={styles.heroTitle}>{item.title}</Text>
           <Text style={[styles.heroAmount, isIncome ? styles.amountIncome : styles.amountExpense]}>
@@ -102,7 +105,11 @@ const RecurringDetailScreen = ({ navigation, route }) => {
 
           <View style={styles.infoRow}>
             <View style={[styles.infoIcon, { backgroundColor: `${catColor}15` }]}>
-              <Text style={{ fontSize: 16 }}>{cat.icon || '🔄'}</Text>
+              {cat.icon ? (
+                <MaterialCommunityIcons name={categoryIcons[cat.icon] || 'help-circle-outline'} size={20} color={catColor} />
+              ) : (
+                <Text style={{ fontSize: 16 }}>🔄</Text>
+              )}
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Category</Text>

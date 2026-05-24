@@ -45,7 +45,7 @@ const recurringSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Calculate nextDueDate based on frequency
+// Calculate nextDueDate based on frequency using proper calendar math
 recurringSchema.pre('save', function () {
   if (this.isModified('startDate') || this.isModified('frequency') || this.isNew) {
     const date = new Date(this.startDate);
@@ -57,12 +57,13 @@ recurringSchema.pre('save', function () {
         date.setDate(date.getDate() + 7);
         break;
       case 'monthly':
-        date.setDate(date.getDate() + 30);
+        date.setMonth(date.getMonth() + 1);
         break;
       case 'yearly':
-        date.setDate(date.getDate() + 365);
+        date.setFullYear(date.getFullYear() + 1);
         break;
       default:
+        date.setMonth(date.getMonth() + 1);
         break;
     }
     this.nextDueDate = date;

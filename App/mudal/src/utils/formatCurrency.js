@@ -26,8 +26,8 @@ export const formatCurrency = (amount, currency = 'LKR', showSign = false) => {
     });
   } else {
     formatted = absAmount.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     });
   }
 

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import colors from '../constants/colors';
 import typography from '../constants/typography';
 import { formatCurrency } from '../utils/formatCurrency';
+import CategoryIcon from './CategoryIcon';
 
 const RecurringItem = ({ item, currency = 'LKR', onPress, onEdit, onDelete }) => {
   const cat = item.category || {};
@@ -18,14 +19,19 @@ const RecurringItem = ({ item, currency = 'LKR', onPress, onEdit, onDelete }) =>
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
 
-      {/* Emoji / icon circle */}
-      <View style={[styles.iconCircle, { backgroundColor: `${catColor}20` }]}>
-        {cat.icon ? (
-          <Text style={styles.emojiText}>{cat.icon}</Text>
-        ) : (
+      {/* Icon */}
+      {cat.icon ? (
+        <CategoryIcon
+          iconKey={cat.icon}
+          color={catColor}
+          size={46}
+          iconSize={22}
+        />
+      ) : (
+        <View style={[styles.iconCircle, { backgroundColor: `${catColor}20` }]}>
           <Ionicons name="repeat" size={20} color={catColor} />
-        )}
-      </View>
+        </View>
+      )}
 
       {/* Info */}
       <View style={styles.info}>
@@ -59,25 +65,31 @@ const RecurringItem = ({ item, currency = 'LKR', onPress, onEdit, onDelete }) =>
           {isIncome ? '+' : '-'}{formatCurrency(item.amount, currency)}
         </Text>
 
-        <View style={styles.actionRow}>
-          {/* Edit icon */}
-          <TouchableOpacity
-            style={[styles.iconBtn, styles.iconBtnEdit]}
-            onPress={(e) => { e.stopPropagation?.(); onEdit && onEdit(); }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="pencil" size={13} color={colors.primaryDark} />
-          </TouchableOpacity>
+        {(onEdit || onDelete) && (
+          <View style={styles.actionRow}>
+            {/* Edit icon */}
+            {onEdit && (
+              <TouchableOpacity
+                style={[styles.iconBtn, styles.iconBtnEdit]}
+                onPress={(e) => { e.stopPropagation?.(); onEdit(); }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="pencil" size={13} color={colors.primaryDark} />
+              </TouchableOpacity>
+            )}
 
-          {/* Delete icon */}
-          <TouchableOpacity
-            style={[styles.iconBtn, styles.iconBtnDelete]}
-            onPress={(e) => { e.stopPropagation?.(); onDelete && onDelete(); }}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="trash-outline" size={13} color={colors.danger} />
-          </TouchableOpacity>
-        </View>
+            {/* Delete icon */}
+            {onDelete && (
+              <TouchableOpacity
+                style={[styles.iconBtn, styles.iconBtnDelete]}
+                onPress={(e) => { e.stopPropagation?.(); onDelete(); }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="trash-outline" size={13} color={colors.danger} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );

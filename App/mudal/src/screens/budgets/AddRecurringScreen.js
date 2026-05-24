@@ -8,30 +8,18 @@ import ScreenWrapper from '../../components/ScreenWrapper';
 import AmountInput from '../../components/AmountInput';
 import InputField from '../../components/InputField';
 import PillButton from '../../components/PillButton';
+import CategoryIcon from '../../components/CategoryIcon';
 import useRecurringStore from '../../store/recurringStore';
 import useAuthStore from '../../store/authStore';
+import useCategoryStore from '../../store/categoryStore';
 
 const FREQUENCIES = ['daily', 'weekly', 'monthly', 'yearly'];
-
-// ── Preset recurring categories (emoji-based, self-contained) ─────────────────
-const RECURRING_CATEGORIES = [
-  { _id: 'rc_01', name: 'Business Income', icon: '🏢', color: '#4CAF50', type: 'income' },
-  { _id: 'rc_02', name: 'Salary',          icon: '💰', color: '#03A9F4', type: 'income' },
-  { _id: 'rc_03', name: 'Housing',         icon: '🏠', color: '#FF9800', type: 'expense' },
-  { _id: 'rc_04', name: 'Water Bills',     icon: '💧', color: '#2196F3', type: 'expense' },
-  { _id: 'rc_05', name: 'Electricity',     icon: '⚡', color: '#FFC107', type: 'expense' },
-  { _id: 'rc_06', name: 'Internet',        icon: '🌐', color: '#00BCD4', type: 'expense' },
-  { _id: 'rc_07', name: 'Phone Bills',     icon: '📱', color: '#9C27B0', type: 'expense' },
-  { _id: 'rc_08', name: 'Gym',             icon: '🏋️', color: '#E91E63', type: 'expense' },
-  { _id: 'rc_09', name: 'Loan',            icon: '🏦', color: '#607D8B', type: 'expense' },
-  { _id: 'rc_10', name: 'Insurance',       icon: '🛡️', color: '#8BC34A', type: 'expense' },
-  { _id: 'rc_11', name: 'Subscriptions',   icon: '📺', color: '#FF5722', type: 'expense' },
-];
 
 const AddRecurringScreen = ({ navigation, route }) => {
   const edit = route?.params?.recurring;
   const { user } = useAuthStore();
   const { addRecurring, updateRecurring, deleteRecurring, isLoading } = useRecurringStore();
+  const { categories, fetchCategories } = useCategoryStore();
   const currency = user?.currency || 'LKR';
 
   const [type, setType] = useState(edit?.type || 'expense');
@@ -51,7 +39,9 @@ const AddRecurringScreen = ({ navigation, route }) => {
     }
   };
 
-  const filteredCategories = RECURRING_CATEGORIES.filter((c) => c.type === type);
+  React.useEffect(() => { fetchCategories(); }, []);
+
+  const filteredCategories = categories.filter((c) => c.type === type);
 
   const handleSave = async () => {
     if (!title.trim()) { Alert.alert('Missing Title', 'Enter a name'); return; }
@@ -192,10 +182,8 @@ const AddRecurringScreen = ({ navigation, route }) => {
                   {/* Colour dot in top-right corner when selected */}
                   {sel && <View style={[styles.selDot, { backgroundColor: cat.color }]} />}
 
-                  {/* Emoji icon inside a tinted circle */}
-                  <View style={[styles.emojiCircle, { backgroundColor: `${cat.color}20` }]}>
-                    <Text style={styles.emojiText}>{cat.icon}</Text>
-                  </View>
+                  {/* Icon */}
+                  <CategoryIcon iconKey={cat.icon} color={cat.color} size={40} iconSize={20} />
 
                   <Text
                     style={[styles.catText, sel && { color: cat.color, fontWeight: '600' }]}

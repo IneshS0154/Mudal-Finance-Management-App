@@ -2,12 +2,16 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const { startScheduler } = require('./services/recurringScheduler');
 
 const recurringRoutes = require('./routes/recurring');
 
 
 dotenv.config();
-connectDB();
+connectDB().then(() => {
+  // Start the recurring transaction scheduler after DB is ready
+  startScheduler();
+});
 
 const app = express();
 app.use(cors());
